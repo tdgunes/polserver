@@ -148,7 +148,7 @@ serverurl=unix:///tmp/supervisor.sock ; use a unix:// URL  for a unix socket
 """
 import requests
 import os
-import shutil, json
+import shutil, json, random
 
 ROUTER_URL = "http://127.0.0.1:8080"
 AREAS_URL = "{0}/api/areas/".format(ROUTER_URL)
@@ -208,7 +208,8 @@ for area in areas:
     print("Setting address to the router")
     area["url"] = "http://127.0.0.1:{0}".format(PORT_NUMBER - 1)
     headers = {'Content-type': 'application/json'}
-
+    print("Add defaul super user")
+    print_execute(u"python \"{0}/manage.py\" add_default_super_user".format(short_name))
     # Add new url to server
     r = requests.put("http://127.0.0.1:8080/api/areas/{0}/".format(area["id"]), data=json.dumps(area), headers=headers)
 
@@ -225,6 +226,17 @@ print_execute("supervisord -c supervisord.conf")
 print("For shutdown write: supervisorctl -c supervisord.conf shutdown !")
 print("Setting up new servers:")
 
+example_policies = [
+    "Devices with photographing capabilities are not allowed.",
+    "Devices with speakers must turn off their devices.",
+    "Devices must turn off wireless communication capabilities.",
+    "Bluetooth is not allowed.",
+    "WiFi connections are not allowed.",
+    "Maximum allowed volume is %20.",
+    "Devices shall play only jazz songs.",
+    "Vibrate mode is not allowed. "
+]
+
 for area in areas:
     print(u"Setting up server named as {0}".format(area["name"]))
     headers = {'Content-type': 'application/json'}
@@ -236,7 +248,8 @@ for area in areas:
     print requests.post("{0}/api/settings/".format(area["url"]), data=json.dumps(payload), headers=headers).text
     payload = {'key': "router", "value": ROUTER_URL}
     print requests.post("{0}/api/settings/".format(area["url"]), data=json.dumps(payload), headers=headers).text
-
+    payload = {'text': random.choice(example_policies), "author": 1}
+    print requests.post("{0}/api/policies/".format(area["url"]), data=json.dumps(payload), headers=headers).text
 
 print("In total {0} servers are up and running for testing.".format(len(areas)))
 print("Bye!")

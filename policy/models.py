@@ -21,7 +21,7 @@ class GlobalSettings(models.Model):
 
 class Policy(models.Model):
     text = models.CharField(max_length=9000)
-    color = RGBColorField(default='#123445')
+    color = RGBColorField(default='#123445', blank=True)
     author = models.ForeignKey('User')
     timestamp = models.DateTimeField(auto_now_add=True)
 
