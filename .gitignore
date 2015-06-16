@@ -59,6 +59,6 @@ docs/_build/
 # PyBuilder
 target/
 
-
+servers/
 
 db.sqlite3
