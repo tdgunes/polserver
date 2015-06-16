@@ -10,7 +10,7 @@ class GlobalSettingsSerializer(ModelSerializer):
 
 class PolicySerializer(ModelSerializer):
     class Meta:
-        fields = ('text', 'color')
+        fields = ('text', 'color', 'author')
         model = Policy
 
 class UserSerializer(HyperlinkedModelSerializer):
