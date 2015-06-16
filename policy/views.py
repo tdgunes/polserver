@@ -35,8 +35,8 @@ class GetAllPolicies(APIView):
             for area in super_areas:
                 full_url = urlparse.urljoin(area["url"], "/api/policies/")
                 request = requests.get(full_url)
-                policy_obj = {"name": server_name,
-                "url": server_url,
+                policy_obj = {"name": area["name"],
+                "url": area["url"],
                 "policies": request.json()}
                 policies.append(policy_obj)
             serializer = PolicySerializer(self.queryset, many=True)
