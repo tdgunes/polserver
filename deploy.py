@@ -13,8 +13,8 @@ SUPERVISOR_CONF = u"""
 ;    variables can be expanded using this syntax: "%(ENV_HOME)s".
 ;  - Comments must have a leading space: "a=b ;comment" not "a=b;comment".
 
-;[unix_http_server]
-;file=/tmp/supervisor.sock   ; (the path to the socket file)
+[unix_http_server]
+file=/tmp/supervisor.sock   ; (the path to the socket file)
 ;chmod=0700                 ; socket file mode (default 0700)
 ;chown=nobody:nogroup       ; socket file uid:gid owner
 ;username=user              ; (default is no username (open server))
@@ -223,8 +223,8 @@ with open("supervisord.conf", "w") as f:
 print("Starting the supervisor silently")
 # print_execute("supervisorctl -c supervisord.conf shutdown")
 print_execute("supervisord -c supervisord.conf")
-print("For shutdown write: supervisorctl -c supervisord.conf shutdown !")
-print("Setting up new servers:(waiting 3 seconds)")
+print("For shutdown write: supervisorctl -c ./servers/supervisord.conf shutdown ")
+print("Setting up new servers:(waiting {0} seconds)".format(len(areas)*2))
 
 example_policies = [
     "Devices with photographing capabilities are not allowed.",
@@ -236,7 +236,7 @@ example_policies = [
     "Devices shall play only jazz songs.",
     "Vibrate mode is not allowed. "
 ]
-time.sleep(3)
+time.sleep(len(areas)*2)
 for area in areas:
     print(u"Setting up server named as {0}".format(area["name"]))
     headers = {'Content-type': 'application/json'}
