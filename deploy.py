@@ -148,7 +148,7 @@ serverurl=unix:///tmp/supervisor.sock ; use a unix:// URL  for a unix socket
 """
 import requests
 import os
-import shutil, json, random
+import shutil, json, random, time
 
 ROUTER_URL = "http://127.0.0.1:8080"
 AREAS_URL = "{0}/api/areas/".format(ROUTER_URL)
@@ -224,7 +224,7 @@ print("Starting the supervisor silently")
 # print_execute("supervisorctl -c supervisord.conf shutdown")
 print_execute("supervisord -c supervisord.conf")
 print("For shutdown write: supervisorctl -c supervisord.conf shutdown !")
-print("Setting up new servers:")
+print("Setting up new servers:(waiting 3 seconds)")
 
 example_policies = [
     "Devices with photographing capabilities are not allowed.",
@@ -236,7 +236,7 @@ example_policies = [
     "Devices shall play only jazz songs.",
     "Vibrate mode is not allowed. "
 ]
-
+time.sleep(3)
 for area in areas:
     print(u"Setting up server named as {0}".format(area["name"]))
     headers = {'Content-type': 'application/json'}

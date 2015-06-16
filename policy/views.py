@@ -35,11 +35,15 @@ class GetAllPolicies(APIView):
             for area in super_areas:
                 full_url = urlparse.urljoin(area["url"], "/api/policies/")
                 request = requests.get(full_url)
-                serializer = PolicySerializer(request.json(), many=True)
                 policy_obj = {"name": server_name,
                 "url": server_url,
-                "policies": serializer.data}
+                "policies": request.json()}
                 policies.append(policy_obj)
+            serializer = PolicySerializer(self.queryset, many=True)
+            response = {"name": server_name,
+                        "url": server_url,
+                        "policies": serializer.data}
+            policies.append(response)
             return Response(policies, status=status.HTTP_200_OK)
         else:
             serializer = PolicySerializer(self.queryset, many=True)
