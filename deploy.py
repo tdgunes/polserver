@@ -208,17 +208,23 @@ for area in areas:
     print("Setting address to the router")
     area["url"] = "http://127.0.0.1:{0}".format(PORT_NUMBER - 1)
     headers = {'Content-type': 'application/json'}
-    print("Add defaul super user")
+    print("Add default super user to the server")
     print_execute(u"python \"{0}/manage.py\" add_default_super_user".format(short_name))
     # Add new url to server
     r = requests.put("http://127.0.0.1:8080/api/areas/{0}/".format(area["id"]), data=json.dumps(area), headers=headers)
 
 
 
-print("Writing supervisor configuration")
+print("Writing supervisor configuration and helper starter files")
 with open("supervisord.conf", "w") as f:
     str = SUPERVISOR_CONF + SUPERVISOR_PROGRAMS
     f.write(str.encode('utf8'))
+
+with open("start.sh", "w") as f:
+    f.write("supervisord -c supervisord.conf\n")
+
+with open("stop.sh", "w") as f:
+    f.write("supervisorctl -c supervisord.conf shutdown\n")
 
 print("Starting the supervisor silently")
 # print_execute("supervisorctl -c supervisord.conf shutdown")
