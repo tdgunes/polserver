@@ -1,8 +1,11 @@
 __author__ = 'tdgunes'
 
 from rest_framework.serializers import ModelSerializer, HyperlinkedModelSerializer
-from .models import Policy, User, GlobalSettings
+from .models import Policy, User, GlobalSettings, Beacon
 
+class BeaconSerializer(ModelSerializer):
+    class Meta:
+        model = Beacon
 
 class GlobalSettingsSerializer(ModelSerializer):
     class Meta:

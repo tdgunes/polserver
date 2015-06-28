@@ -4,11 +4,21 @@ from colorful.fields import RGBColorField
 # Create your models here.
 
 class GlobalSettingsManager(models.Manager):
+
+      def set_setting(self, key, value):
+          try:
+              setting = GlobalSettings.objects.get(key=key)
+              setting.value = value
+              setting.save()
+          except GlobalSettings.DoesNotExist:
+              setting = GlobalSettings(key=key, value=value)
+              setting.save()
+
       def get_setting(self, key):
           try:
               setting = GlobalSettings.objects.get(key=key)
-          except:
-              return "N/A"
+          except GlobalSettings.DoesNotExist:
+              return GlobalSettings(key="N/A", value="N/A")
           return setting
 
 class GlobalSettings(models.Model):
@@ -19,14 +29,33 @@ class GlobalSettings(models.Model):
       def __unicode__(self):
           return "${0} = {1}".format(self.key.upper(), self.value)
 
+class Beacon(models.Model):
+    name = models.CharField(max_length=400)
+    uuid = models.CharField(max_length=36, unique=True)
+
+    def __unicode__(self):
+        return "{0} ({1})".format(self.name, self.uuid)
+
+    def get_all_policies(self):
+        return self.policy_set
+
+
+class PolicyManager(models.Manager):
+    def get_general_policies(self):
+        return Policy.objects.filter(beacon=None)
+
 class Policy(models.Model):
     text = models.CharField(max_length=9000)
     color = RGBColorField(default='#123445', blank=True)
     author = models.ForeignKey('User')
     timestamp = models.DateTimeField(auto_now_add=True)
+    beacon = models.ForeignKey(Beacon, blank=True, null=True)
+    objects = PolicyManager()
 
     def __unicode__(self):
         return self.text
+
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password, commit=True):
