@@ -42,7 +42,7 @@ class GetAllPolicies(APIView):
         server_url = GlobalSettings.objects.get_setting("url").value
         return server_name, server_url
 
-    def get_supers(self):
+    def get_supers_policies(self):
         """
         if cache is expired:
             get policies from super and
@@ -59,19 +59,28 @@ class GetAllPolicies(APIView):
         update_inteval = int(GlobalSettings.objects.get_setting("cache_update_interval").value)
 
         now = arrow.utcnow().timestamp
-        super_policies = []
         if (now - last_updated) >= update_inteval: # cache is expired
             payload = json.dumps({"id":identifier})
-            full_url = urlparse.urljoin(GlobalSettings.objects.get_setting("router").value, "/api/policies/all")
+            full_url = urlparse.urljoin(GlobalSettings.objects.get_setting("router").value, "/api/area/super")
             headers = {'Content-type': 'application/json'}
             try:
                 r = requests.post(full_url, data=payload, headers=headers)
             except requests.ConnectionError:
-                print "[Warning] Unable to access to router"
+                print "[Warning] Unable to access to router", full_url
                 return []
 
             print "[Info] Cache is expired, fetched from super:", r.text
+            super_area = r.json()
+            super_area_url = super_area["url"]
+            payload = "{}"
+            super_area_policy_url = urlparse.urljoin(super_area_url, "/api/policies/all")
+            try:
+                r = requests.post(super_area_policy_url, data=payload, headers=headers)
+            except requests.ConnectionError:
+                print "[Warning] Unable to access to super area on", super_area_url
+
             super_policies = r.json()
+
             GlobalSettings.objects.set_setting("cache", json.dumps(super_policies))
             GlobalSettings.objects.set_setting("cache_last_updated", str(now))
 
@@ -89,7 +98,7 @@ class GetAllPolicies(APIView):
             policy = self.set_up_policies(beacon.name, server_url+"#"+beacon.uuid, PolicySerializer(beacon.get_all_policies(), many=True).data)
             policies.insert(0, policy)
 
-        super_policies = self.get_supers()
+        super_policies = self.get_supers_policies()
         my_policies = Policy.objects.get_general_policies()
         print "[Info] My Policies:", my_policies
         serializer = PolicySerializer(my_policies, many=True)

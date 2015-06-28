@@ -174,6 +174,8 @@ def ensure_clean_dir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+print_wait("Shutting down previous server configuration")
+print_execute("supervisorctl -c ./servers/supervisord.conf shutdown")
 
 print_wait("Ensuring a clean 'servers' directory...")
 ensure_clean_dir("servers")
@@ -251,14 +253,20 @@ time.sleep(len(areas)*2)
 for area in areas:
     print(u"Setting up server named as {0}".format(area["name"]))
     headers = {'Content-type': 'application/json'}
-    payload = {'key':"name", "value": area["name"]}
-    print requests.put("{0}/api/settings/1/".format(area["url"]), data=json.dumps(payload), headers=headers).text
+
     payload = {'key': "url", "value": area["url"]}
+    print requests.put("{0}/api/settings/1/".format(area["url"]), data=json.dumps(payload), headers=headers).text
+
+
+    payload = {'key':"name", "value": area["name"]}
     print requests.put("{0}/api/settings/2/".format(area["url"]), data=json.dumps(payload), headers=headers).text
+
     payload = {'key': "id", "value": area["id"]}
     print requests.put("{0}/api/settings/3/".format(area["url"]), data=json.dumps(payload), headers=headers).text
+
     payload = {'key': "router", "value": ROUTER_URL}
     print requests.put("{0}/api/settings/4/".format(area["url"]), data=json.dumps(payload), headers=headers).text
+
     payload = {'text': random.choice(example_policies), "author": 1}
     print requests.post("{0}/api/policies/".format(area["url"]), data=json.dumps(payload), headers=headers).text
 
