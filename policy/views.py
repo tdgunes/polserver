@@ -103,11 +103,6 @@ class GetAllPolicies(APIView):
 
 
 
-
-
-
-
-
 @require_GET
 def index_view(request):
     data = {"name": GlobalSettings.objects.get_setting("name"),

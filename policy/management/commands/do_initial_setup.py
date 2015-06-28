@@ -22,6 +22,9 @@ class Command(BaseCommand):
         name.save()
         self.stdout.write('Successfully added name field to settings.')
 
+        identifier = GlobalSettings(key="id", value="1")
+        identifier.save()
+        self.stdout.write('Successfully added id field to settings.')
 
         router = GlobalSettings(key="router", value="http://127.0.0.1:8080")
         router.save()

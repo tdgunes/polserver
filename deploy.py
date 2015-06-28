@@ -146,9 +146,12 @@ serverurl=unix:///tmp/supervisor.sock ; use a unix:// URL  for a unix socket
 ;files = relative/directory/*.ini
 
 """
-import requests
 import os
-import shutil, json, random, time
+import shutil
+import json
+import random
+import time
+import requests
 
 ROUTER_URL = "http://127.0.0.1:8080"
 AREAS_URL = "{0}/api/areas/".format(ROUTER_URL)
@@ -196,12 +199,13 @@ stopasgroup=true
     SUPERVISOR_PROGRAMS = SUPERVISOR_PROGRAMS + "\n" + program
     PORT_NUMBER += 1
 
+print_execute("git clone https://github.com/tdgunes/polserver.git")
+
 
 for area in areas:
     short_name = (''.join(e for e in area["name"] if e.isalnum())).lower()
-    print(u"Initializing {0} server's files...".format(area["name"]))
-    print_execute("git clone https://github.com/tdgunes/polserver.git")
-    os.rename("polserver", short_name)
+    print(u"Initializing {0} server's files...(copying)".format(area["name"]))
+    shutil.copytree("polserver", short_name)
     print("Generating the initial database")
     print_execute(u"python \"{0}/manage.py\" migrate".format(short_name))
     add_program(short_name)
@@ -209,7 +213,7 @@ for area in areas:
     area["url"] = "http://127.0.0.1:{0}".format(PORT_NUMBER - 1)
     headers = {'Content-type': 'application/json'}
     print("Add default super user to the server")
-    print_execute(u"python \"{0}/manage.py\" add_default_super_user".format(short_name))
+    print_execute(u"python \"{0}/manage.py\" do_initial_setup".format(short_name))
     # Add new url to server
     r = requests.put("http://127.0.0.1:8080/api/areas/{0}/".format(area["id"]), data=json.dumps(area), headers=headers)
 
@@ -242,20 +246,25 @@ example_policies = [
     "Devices shall play only jazz songs.",
     "Vibrate mode is not allowed. "
 ]
+
 time.sleep(len(areas)*2)
 for area in areas:
     print(u"Setting up server named as {0}".format(area["name"]))
     headers = {'Content-type': 'application/json'}
     payload = {'key':"name", "value": area["name"]}
-    print requests.post("{0}/api/settings/".format(area["url"]), data=json.dumps(payload), headers=headers).text
+    print requests.put("{0}/api/settings/1/".format(area["url"]), data=json.dumps(payload), headers=headers).text
     payload = {'key': "url", "value": area["url"]}
-    print requests.post("{0}/api/settings/".format(area["url"]), data=json.dumps(payload), headers=headers).text
+    print requests.put("{0}/api/settings/2/".format(area["url"]), data=json.dumps(payload), headers=headers).text
     payload = {'key': "id", "value": area["id"]}
-    print requests.post("{0}/api/settings/".format(area["url"]), data=json.dumps(payload), headers=headers).text
+    print requests.put("{0}/api/settings/3/".format(area["url"]), data=json.dumps(payload), headers=headers).text
     payload = {'key': "router", "value": ROUTER_URL}
-    print requests.post("{0}/api/settings/".format(area["url"]), data=json.dumps(payload), headers=headers).text
+    print requests.put("{0}/api/settings/4/".format(area["url"]), data=json.dumps(payload), headers=headers).text
     payload = {'text': random.choice(example_policies), "author": 1}
     print requests.post("{0}/api/policies/".format(area["url"]), data=json.dumps(payload), headers=headers).text
 
 print("In total {0} servers are up and running for testing.".format(len(areas)))
+
+shutil.rmtree("polserver")
+
 print("Bye!")
+
