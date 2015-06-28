@@ -71,15 +71,19 @@ class GetAllPolicies(APIView):
 
             print "[Info] Cache is expired, fetched from super"
             super_area = r.json()
-            super_area_url = super_area["url"]
-            payload = "{}"
-            super_area_policy_url = urlparse.urljoin(super_area_url, "/api/policies/all")
-            try:
-                r = requests.post(super_area_policy_url, data=payload, headers=headers)
-            except requests.ConnectionError:
-                print "[Warning] Unable to access to super area on", super_area_url
+            super_area_url = super_area.get("url",None)
+            super_policies = {}
+            if super_area_url:
+                payload = "{}"
+                super_area_policy_url = urlparse.urljoin(super_area_url, "/api/policies/all")
+                try:
+                    r = requests.post(super_area_policy_url, data=payload, headers=headers)
+                except requests.ConnectionError:
+                    print "[Warning] Unable to access to super area on", super_area_url
 
-            super_policies = r.json()
+
+
+                super_policies = r.json()
 
             GlobalSettings.objects.set_setting("cache", json.dumps(super_policies))
             GlobalSettings.objects.set_setting("cache_last_updated", str(now))
