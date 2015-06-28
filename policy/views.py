@@ -69,7 +69,7 @@ class GetAllPolicies(APIView):
                 print "[Warning] Unable to access to router", full_url
                 return []
 
-            print "[Info] Cache is expired, fetched from super:", r.text
+            print "[Info] Cache is expired, fetched from super"
             super_area = r.json()
             super_area_url = super_area["url"]
             payload = "{}"
