@@ -109,8 +109,11 @@ class GetAllPolicies(APIView):
         my_policies = self.set_up_policies(server_name, server_url, serializer.data)
         policies.insert(0, my_policies)
 
-        policies = super_policies + policies
+        if super_policies:
+            policies = super_policies + policies
 
+        # for super_policy in super_policies:
+        #     policies.insert(0, super_policy)
 
         return Response(policies, status=status.HTTP_200_OK)
 
